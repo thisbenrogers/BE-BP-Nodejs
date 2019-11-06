@@ -18,7 +18,7 @@
 
 - Update package.json scripts to include server (and start) script(s):
 
-```
+```js
 "scripts": {
 	"server": "nodemon",  //defaults to index.js
 	"start": "node index.js" (optional, for production)
@@ -31,7 +31,7 @@
 
 - Update knexfile.js to:
 
-```
+```js
 module.exports = {
   development: {
     client: 'sqlite3',
@@ -50,6 +50,12 @@ module.exports = {
     seeds: {
       directory: './data/seeds',
     },
+    // pool needed when using foreign keys, required for sqlite
+    pool: {
+      afterCreate: (conn, done) => {
+      // runs after a connection is made to the sqlite engine
+      conn.run('PRAGMA foreign_keys = ON', done); // turn on FK enforcement
+    },
   },
 };
 ```
@@ -60,7 +66,7 @@ module.exports = {
 
 - Example schema for a user table:
 
-```
+```js
 exports.up = function(knex) {
     return knex.schema.createTable('users', users => {
       users.increments();
@@ -87,11 +93,27 @@ exports.up = function(knex) {
 
 ## Seeding (optional):
 
+## <p align="center">< -------- TODO: polish knex-cleanup process ----------></p>
+
+- Add `knex-cleanup` via npm
+
+- add a cleanup seed `knex seed:make 00-cleanup.js` with the following code:
+
+```js
+const cleaner = require('knex-cleaner');
+
+exports.seed = function(knex) {
+  return cleaner.clean(knex, {
+    ignoreTables: ['knex_migrations', 'knex_migrations_lock'], // don't empty migration tables
+  });
+};
+```
+
 - `npx knex seed:make 001-seedName` (makes a new seed)
 
 - Example seeds > 001-exampleSeed.js file:
 
-```
+```js
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
   return knex('table_name').truncate()
@@ -112,7 +134,7 @@ exports.seed = function(knex, Promise) {
 
 - In the data directory, create a file called "dbConfig.js" and include the following code:
 
-```
+```js
 const knex = require('knex');
 
 const knexConfig = require('../knexfile.js');
