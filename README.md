@@ -97,7 +97,7 @@ exports.up = function(knex) {
 
 - Add `knex-cleanup` via npm
 
-- add a cleanup seed `knex seed:make 00-cleanup.js` with the following code:
+- `knex seed:make 00-cleanup.js` (makes a new seed cleanup file), example:
 
 ```js
 const cleaner = require('knex-cleaner');
